@@ -1,33 +1,60 @@
 import letterFunctions
 import hangmanPatterns
 from string import ascii_letters
+from random import choice
 
 
-def list_to_string(list):
-    string = "".join(list)
+def list_to_string(list_of_strings, separator=""):
+    if separator == "":
+        string = "".join(list_of_strings)
+    else:
+        string = ""
+        for item in list_of_strings:
+            if item == list_of_strings[-1]:
+                string += item
+            else:
+                string += item + separator
     return string
 
 
+f = open("words.txt")
+list_with_words = []
+for line in f:
+    line.replace("\n", "")
+    list_with_words.append(line)
+f.close()
+
 line = "=============================================="
 
-word = "example"
+word = choice(list_with_words).strip()
 guess = ...
 guessed_word = ""
+typedLetters = []
 
 for letter in word:
     if letter not in ascii_letters:
-        print(f"Error in word \"{word}\" from word list!")
-        pass
+        print(f"Error in symbol from word \"{word}\" from word list!")
     guessed_word += "_"
 
 mistakes = 0
 
 while guessed_word != word and mistakes < 10:
-    guess = input("Type letter\n").lower()
+    guess = input("Type letter: ").lower()
 
     if len(guess) != 1:
-        print("Letter can be a symbol from [a-z] or [A-Z]")
-        pass
+        print("Letter can be only 1 character")
+        continue
+
+    if guess not in ascii_letters:
+        print("This isn't letter")
+        continue
+
+    if guess in typedLetters:
+        print("You typed this letter before")
+        continue
+
+    typedLetters.append(guess)
+    typedLetters.sort()
 
     correct_guess = letterFunctions.is_in_word(guess, word)
 
@@ -40,31 +67,22 @@ while guessed_word != word and mistakes < 10:
         guessed_word = list_to_string(guessed_word)
 
         indexes_to_replace = []
-
-        print(f"Nice guess\n"
-              f"\n"
-              f"{hangmanPatterns.draw_hangman(mistakes)}")
+        print(hangmanPatterns.draw_hangman(mistakes))
         print(guessed_word)
-        print("\n")
-        print(line)
+        print(f"Typed letters: {list_to_string(typedLetters, ', ')}")
+        print(f"\n{line}\n")
 
     else:
         mistakes += 1
 
-        print(f"I don't see this letter in word\n"
-              f"\n"
-              f"{hangmanPatterns.draw_hangman(mistakes)}")
+        print(hangmanPatterns.draw_hangman(mistakes))
         print(guessed_word)
-        print("\n")
-        print(line)
-        pass
+        print(f'Typed letters: {list_to_string(typedLetters, ", ")}')
+        print(f'\n{line}\n')
+
+        continue
 
 if word == guessed_word:
-    print(f"{line}\n"
-          f"Congratulations you win!\n"
-          f"{line}")
+    print(f"Congratulations you win!")
 else:
-    print(f"\n"
-          f"{line}\n"
-          f"You lost :c! Word: {word}\n"
-          f"{line}")
+    print(f"You lost! The word is {word}")
